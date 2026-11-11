@@ -25,6 +25,10 @@
 .project-card[href$="/poem"] .project-cover{aspect-ratio:1046/584;background:#fff}.project-card[href$="/poem"] .project-cover img{object-fit:contain}.project-card[href$="/poem"]:hover img{transform:none}.orbit-card[href$="/poem"] img{object-fit:contain;background:#fff}.detail-cover[data-project="poem"]{max-height:none}.detail-cover[data-project="poem"] img{height:auto;max-height:none;object-fit:contain}#project-page:has(.detail-cover[data-project="poem"]) .launch-overlay{background-size:contain;background-repeat:no-repeat;background-color:#fff}
 
 .project-card[href$="/tteokbi"] .project-cover{aspect-ratio:2980/1548;background:#21150d}.project-card[href$="/tteokbi"] .project-cover img{object-fit:contain}.project-card[href$="/tteokbi"]:hover img{transform:none}.orbit-card[href$="/tteokbi"] img{object-fit:contain;background:#21150d}.detail-cover[data-project="tteokbi"]{max-height:none}.detail-cover[data-project="tteokbi"] img{height:auto;max-height:none;object-fit:contain}#project-page:has(.detail-cover[data-project="tteokbi"]) .launch-overlay{background-size:contain;background-repeat:no-repeat;background-color:#21150d}
+.header{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}.header-caption{grid-column:1;grid-row:1;justify-self:start}.header .wordmark{grid-column:2;grid-row:1;justify-self:center}.header nav{grid-column:3;grid-row:1;justify-self:end}
+.cursor-ink,.cursor-dot{position:fixed;inset:0;pointer-events:none;z-index:2147483646;mix-blend-mode:difference}.cursor-ink{width:100vw;height:100vh}.cursor-dot{inset:auto;top:0;left:0;width:0;height:0;opacity:0;z-index:2147483647}.cursor-dot:before{content:'';position:absolute;width:15px;height:15px;left:-7.5px;top:-7.5px;border-radius:50%;background:#fff;transition:scale .15s}.cursor-dot.visible{opacity:1}.cursor-dot.pressed:before{scale:.7}
+@media(hover:hover) and (pointer:fine){.ink-cursor-enabled,.ink-cursor-enabled *{cursor:none!important}}
+@media(max-width:680px){.header{padding:0 4%;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px}.header-caption{display:block;font-size:6px;line-height:1.6;max-width:90px;letter-spacing:0}.header .wordmark{font-size:11px;gap:5px}.header nav{font-size:9px;gap:10px}.status-dot{width:5px;height:5px}}
 </style>
 </head>
 <body>
@@ -139,4 +143,20 @@ window.addEventListener('hashchange',route);route();
 
 function motionSection(p){return `<section class="motion-section" aria-labelledby="motion-title"><div class="case-heading"><div><p class="eyebrow">MOTION GRAPHICS / SENNOK</p><h2 id="motion-title">SENNOK</h2></div><span>00:38 / Motion Graphics</span></div><video controls playsinline preload="metadata" poster="${assetMap['assets/sennok-poster.webp']}" aria-label="SENNOK Motion Graphics 영상"><source src="${p.video}" type="video/mp4">브라우저에서 영상을 재생할 수 없습니다. <a href="${p.video}">영상 열기</a></video></section>`;}
 </script>
-</body></html>
+<script>// A short, fading ink trail. Difference blending keeps it visible over dark work.
+if(matchMedia('(hover:hover) and (pointer:fine)').matches){
+ const ink=document.createElement('canvas');ink.className='cursor-ink';ink.setAttribute('aria-hidden','true');document.body.appendChild(ink);
+ const dot=document.createElement('div');dot.className='cursor-dot';dot.setAttribute('aria-hidden','true');document.body.appendChild(dot);
+ const ctx=ink.getContext('2d');let points=[],visible=false,raf=0;
+ function resizeInk(){const d=Math.min(devicePixelRatio||1,2);ink.width=innerWidth*d;ink.height=innerHeight*d;ctx.setTransform(d,0,0,d,0,0);points=[];}
+ resizeInk();window.addEventListener('resize',resizeInk);
+ function drawInk(now){ctx.clearRect(0,0,innerWidth,innerHeight);points=points.filter(p=>now-p.t<210).slice(-18);
+ if(points.length>1){const newest=points[points.length-1];let distance=0,start=points.length-1;for(let i=points.length-2;i>=0;i--){distance+=Math.hypot(points[i+1].x-points[i].x,points[i+1].y-points[i].y);if(distance>85)break;start=i;}
+ ctx.lineCap='round';ctx.lineJoin='round';for(let i=start+1;i<points.length;i++){const age=1-(now-points[i].t)/210;ctx.strokeStyle=`rgba(255,255,255,${Math.max(0,age)*.65})`;ctx.lineWidth=.5+age*1.5;ctx.beginPath();ctx.moveTo(points[i-1].x,points[i-1].y);ctx.lineTo(points[i].x,points[i].y);ctx.stroke();}}
+ if(points.length)raf=requestAnimationFrame(drawInk);else raf=0;}
+ document.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;dot.style.transform=`translate3d(${e.clientX}px,${e.clientY}px,0)`;dot.classList.add('visible');visible=true;if(!matchMedia('(prefers-reduced-motion:reduce)').matches){points.push({x:e.clientX,y:e.clientY,t:performance.now()});if(!raf)raf=requestAnimationFrame(drawInk);}});
+ document.documentElement.addEventListener('pointerleave',()=>{dot.classList.remove('visible');points=[];});window.addEventListener('blur',()=>{dot.classList.remove('visible');points=[];});
+ document.addEventListener('pointerdown',()=>dot.classList.add('pressed'));document.addEventListener('pointerup',()=>dot.classList.remove('pressed'));
+ document.documentElement.classList.add('ink-cursor-enabled');
+}
+</script></body></html>
