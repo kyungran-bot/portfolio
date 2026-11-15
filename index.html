@@ -235,7 +235,7 @@ const detailData={hinok:{subtitle:"이화여자대학교 '창립 140년 기념' 
 const panel=document.createElement('aside');panel.className='info-panel';panel.hidden=true;panel.setAttribute('aria-label','상세 정보');document.body.append(panel);
 const toggle=document.createElement('button');toggle.className='panel-toggle';toggle.textContent='상세 정보 ↗';toggle.hidden=true;toggle.setAttribute('aria-expanded','false');document.body.append(toggle);
 let current=null;
-function close(){panel.hidden=true;document.body.classList.remove('has-info-panel');toggle.setAttribute('aria-expanded','false');toggle.hidden=!current;}
+function close(){panel.hidden=true;document.body.classList.remove('has-info-panel');toggle.setAttribute('aria-expanded','false');toggle.hidden=!current||current.kind==='EXPERIENCE';}
 function show(title,body,kind){current={title,body,kind};panel.innerHTML='<div class="panel-drag-handle" tabindex="0" role="group" aria-label="상세 카드 이동: 드래그하거나 방향키를 사용하세요"><span class="eyebrow">'+kind+'</span><button class="panel-close" aria-label="상세 정보 닫기">×</button></div><h2>'+escapeHTML(title)+'</h2>'+body;panel.hidden=false;document.body.classList.add('has-info-panel');toggle.hidden=true;toggle.setAttribute('aria-expanded','true');panel.querySelector('button').onclick=close;}
 toggle.onclick=()=>current&&show(current.title,current.body,current.kind);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
