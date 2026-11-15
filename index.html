@@ -62,6 +62,15 @@
 .info-panel[hidden]{display:none}.info-panel h2{font-size:32px;line-height:1.25;margin:30px 0}.info-panel h3{font-size:12px;color:#687080;margin:30px 0 10px;text-transform:uppercase;letter-spacing:.1em}.info-panel p{font-size:14px;line-height:1.85;white-space:pre-line}.info-panel dl{border-top:1px solid #dce1e8;padding-top:20px}.info-panel dt{font-size:12px;color:#687080;margin-top:16px}.info-panel dd{margin:6px 0;font-size:14px;line-height:1.7}.panel-close{float:right;border:1px solid #dce1e8;border-radius:50%;background:transparent;width:32px;height:32px;cursor:pointer}.panel-toggle{position:fixed;right:22px;bottom:22px;z-index:61;border:1px solid #cdd4df;background:white;border-radius:0;padding:14px 20px;color:#2159db;cursor:pointer}body.has-info-panel{padding-right:390px}.experience-detail-trigger,.about-detail-trigger{font:inherit;text-align:left;color:inherit;background:transparent;border:0;padding:0;cursor:pointer;line-height:inherit}.experience-detail-trigger:hover,.about-detail-trigger:hover{color:#2159db}.info-placeholder{color:#9198a4;min-height:140px;border-top:1px solid #dce1e8;padding-top:22px}
 @media(max-width:1000px){body.has-info-panel{padding-right:0}.info-panel{top:74px;width:min(390px,90vw);box-shadow:-15px 0 50px #172b4d14}}
 @media(max-width:600px){.info-panel{top:auto;bottom:0;width:100%;max-height:76dvh;border-left:0;border-top:1px solid #dce1e8;border-radius:0;padding:24px}.info-panel h2{font-size:28px}.panel-toggle{bottom:16px;right:16px}}
+</style><style>
+/* Floating project information card */
+body.has-info-panel{padding-right:0}
+.info-panel{top:100px;right:28px;bottom:auto;left:auto;width:390px;height:min(660px,calc(100dvh - 124px));max-height:calc(100dvh - 32px);padding:26px 28px;border:1px solid #000;border-radius:0;background:rgba(255,255,255,.87);color:#111;box-shadow:none;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);overscroll-behavior:contain}
+.panel-drag-handle{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:30px;cursor:grab;touch-action:none;user-select:none}
+.panel-drag-handle:active,.info-panel.is-dragging .panel-drag-handle{cursor:grabbing}.panel-drag-handle:focus-visible{outline:1px solid #000;outline-offset:5px}
+.info-panel .panel-close{float:none;flex:none;border:0;border-radius:0;padding:0;background:transparent;color:#000;font-size:25px;line-height:1;width:28px;height:28px;cursor:pointer}
+.info-panel h2{margin:32px 0 28px}.info-panel .eyebrow{margin:0}.panel-toggle{color:#000;border:1px solid #000;border-radius:0;background:rgba(255,255,255,.9)}
+@media(max-width:600px){.info-panel{top:88px;right:16px;bottom:auto;width:min(390px,calc(100vw - 32px));height:min(660px,calc(100dvh - 104px));padding:24px;border:1px solid #000;border-radius:0}.info-panel h2{font-size:28px}}
 </style></head>
 <body>
 <a class="skip" href="#work">작업으로 건너뛰기</a>
@@ -227,7 +236,7 @@ const panel=document.createElement('aside');panel.className='info-panel';panel.h
 const toggle=document.createElement('button');toggle.className='panel-toggle';toggle.textContent='상세 정보 ↗';toggle.hidden=true;toggle.setAttribute('aria-expanded','false');document.body.append(toggle);
 let current=null;
 function close(){panel.hidden=true;document.body.classList.remove('has-info-panel');toggle.setAttribute('aria-expanded','false');toggle.hidden=!current;}
-function show(title,body,kind){current={title,body,kind};panel.innerHTML='<button class="panel-close" aria-label="상세 정보 닫기">×</button><span class="eyebrow">'+kind+'</span><h2>'+escapeHTML(title)+'</h2>'+body;panel.hidden=false;document.body.classList.add('has-info-panel');toggle.hidden=true;toggle.setAttribute('aria-expanded','true');panel.querySelector('button').onclick=close;}
+function show(title,body,kind){current={title,body,kind};panel.innerHTML='<div class="panel-drag-handle" tabindex="0" role="group" aria-label="상세 카드 이동: 드래그하거나 방향키를 사용하세요"><span class="eyebrow">'+kind+'</span><button class="panel-close" aria-label="상세 정보 닫기">×</button></div><h2>'+escapeHTML(title)+'</h2>'+body;panel.hidden=false;document.body.classList.add('has-info-panel');toggle.hidden=true;toggle.setAttribute('aria-expanded','true');panel.querySelector('button').onclick=close;}
 toggle.onclick=()=>current&&show(current.title,current.body,current.kind);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
 function projectInfo(p){const d=detailData[p.id];show(p.title,d?'<p>'+escapeHTML(d.subtitle)+'</p><dl><dt>Duration</dt><dd>'+d.duration+'</dd><dt>Team</dt><dd>'+d.team+'</dd></dl><h3>My role</h3><p>'+escapeHTML(d.role)+'</p><h3>Summary</h3><p>'+escapeHTML(d.summary)+'</p>'+(d.note?'<p style="color:#737b88;font-size:12px">* '+escapeHTML(d.note)+'</p>':''):'<p>'+escapeHTML(p.category)+'</p><h3>Summary</h3><p>'+escapeHTML(p.description)+'</p>','PROJECT DETAILS');}
@@ -235,5 +244,17 @@ function sync(){const m=location.hash.match(/^#project\/([a-z]+)$/);if(m){const 
 
 for(const section of document.querySelectorAll('.resume-section')){if(section.querySelector('h3')?.textContent==='Experiences')for(const dd of section.querySelectorAll('dd')){const text=dd.textContent,year=dd.parentElement.querySelector('dt').textContent;const b=document.createElement('button');b.className='experience-detail-trigger';b.textContent=text+' ↗';b.onclick=()=>show(text,'<dl><dt>Period</dt><dd>'+escapeHTML(year)+'</dd></dl>','EXPERIENCE');dd.replaceChildren(b);}}
 window.addEventListener('hashchange',sync);sync();
+})();
+</script><script>
+(()=>{
+const card=document.querySelector('.info-panel');if(!card)return;
+let drag=null;
+function move(x,y){const r=card.getBoundingClientRect();card.style.left=Math.max(8,Math.min(x,innerWidth-r.width-8))+'px';card.style.top=Math.max(8,Math.min(y,innerHeight-r.height-8))+'px';card.style.right='auto';card.style.bottom='auto';}
+card.addEventListener('pointerdown',e=>{const handle=e.target.closest('.panel-drag-handle');if(!handle||e.target.closest('button')||e.button!==0)return;const r=card.getBoundingClientRect();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};handle.setPointerCapture(e.pointerId);card.classList.add('is-dragging');e.preventDefault();});
+card.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;move(drag.left+e.clientX-drag.x,drag.top+e.clientY-drag.y);});
+function end(){drag=null;card.classList.remove('is-dragging');}
+card.addEventListener('pointerup',end);card.addEventListener('pointercancel',end);card.addEventListener('lostpointercapture',end);
+card.addEventListener('keydown',e=>{if(!e.target.matches('.panel-drag-handle'))return;const delta={ArrowLeft:[-16,0],ArrowRight:[16,0],ArrowUp:[0,-16],ArrowDown:[0,16]}[e.key];if(!delta)return;e.preventDefault();const r=card.getBoundingClientRect();move(r.left+delta[0],r.top+delta[1]);});
+window.addEventListener('resize',()=>{if(!card.hidden&&card.style.left){const r=card.getBoundingClientRect();move(r.left,r.top);}});
 })();
 </script></body></html>
